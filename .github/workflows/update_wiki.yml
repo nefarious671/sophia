@@ -1,13 +1,15 @@
-name: Update Wiki
+name: Update Wiki Automatically
 
 on:
+  workflow_dispatch:  # Allows manual triggering
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - main  # Runs when code is pushed to main branch
 
 jobs:
   update-wiki:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -20,10 +22,10 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests  # If your script requires additional packages, list them here
+          pip install requests  # Install required packages
 
       - name: Run Wiki Update Script
         env:
-          GITHUB_TOKEN: ${{ secrets.SOPHIA_TOKEN }}
+          SOPHIA_TOKEN: ${{ secrets.SOPHIA_TOKEN }}  # Securely use your token
         run: |
-          python path/to/your_script.py
+          python scripts/update_wiki.py
