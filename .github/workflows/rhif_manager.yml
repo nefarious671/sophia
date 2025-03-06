@@ -1,0 +1,33 @@
+name: RHIF Markdown Manager
+
+on:
+  push:
+    branches:
+      - main  # Runs when changes are pushed to main
+    paths:
+      - 'rhif/**.md'  # Only trigger when markdown files in /rhif are modified
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  manage-rhif:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests  # Required for GitHub API interactions
+
+      - name: Run RHIF Markdown Manager
+        env:
+          SOPHIA_TOKEN: ${{ secrets.SOPHIA_TOKEN }}  # Securely use the GitHub Token
+        run: |
+          python scripts/rhif_markdown_manager.py
