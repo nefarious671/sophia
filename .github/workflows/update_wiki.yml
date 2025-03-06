@@ -24,6 +24,6 @@ jobs:
 
       - name: Run Wiki Update Script
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SOPHIA_TOKEN }}
         run: |
           python path/to/your_script.py
