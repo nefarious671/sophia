@@ -7,7 +7,7 @@ def update_wiki():
     if not token:
         raise ValueError("SOPHIA_TOKEN is not set")
 
-    repo = 'nefarious671/sophia.wiki'  # Use the correct Wiki repository
+    repo = 'nefarious671/sophia'  # Use the correct Wiki repository
     page = 'Home'  # The Wiki page to update (case-sensitive)
     new_content = 'Updated content for the Wiki page.'  # Replace with actual content
     api_url = f'https://api.github.com/repos/{repo}/contents/{page}.md'
