@@ -6,7 +6,14 @@ on:
       - main  # Runs when changes are pushed to main
     paths:
       - 'rhif/**.md'  # Only trigger when markdown files in /rhif are modified
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: 'Markdown file to create or modify'
+        required: true
+      content:
+        description: 'Content for the markdown file'
+        required: true
 
 jobs:
   manage-rhif:
@@ -30,4 +37,4 @@ jobs:
         env:
           SOPHIA_TOKEN: ${{ secrets.SOPHIA_TOKEN }}  # Securely use the GitHub Token
         run: |
-          python scripts/rhif_markdown_manager.py
+          python scripts/rhif_markdown_manager.py create "${{ github.event.inputs.filename }}" "${{ github.event.inputs.content }}"
