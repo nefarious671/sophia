@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import base64
 
@@ -61,45 +62,19 @@ def update_markdown_file(filename, content, mode="overwrite"):
     update_response.raise_for_status()
     print(f"✅ Successfully updated {filename} in {FOLDER_PATH}!")
 
-def rename_markdown_file(old_name, new_name):
-    """Renames a Markdown file by creating a new one and deleting the old one."""
-    files = list_md_files()
-    if old_name not in files:
-        print(f"❌ File '{old_name}' does not exist.")
-        return
-    
-    # Read old content
-    api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{old_name}"
+def delete_markdown_file(filename):
+    """Deletes a Markdown file from the GitHub repository."""
+    api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{filename}"
     response = requests.get(api_url, headers=HEADERS)
     if response.status_code != 200:
-        response.raise_for_status()
-    old_content = base64.b64decode(response.json().get("content")).decode()
+        print(f"❌ File '{filename}' not found.")
+        return
     sha = response.json().get("sha")
-    
-    # Create new file
-    update_markdown_file(new_name, old_content)
-    
-    # Delete old file
-    delete_markdown_file(old_name, sha)
-    print(f"✅ Successfully renamed {old_name} to {new_name}.")
-
-def delete_markdown_file(filename, sha=None):
-    """Deletes a Markdown file from the GitHub repository."""
-    if sha is None:
-        # Fetch the SHA if not provided
-        api_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{filename}"
-        response = requests.get(api_url, headers=HEADERS)
-        if response.status_code != 200:
-            print(f"❌ File '{filename}' not found.")
-            return
-        sha = response.json().get("sha")
-    
-    delete_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{filename}"
     delete_data = {
         "message": f"Deleted {filename}",
         "sha": sha
     }
-    delete_response = requests.delete(delete_url, headers=HEADERS, json=delete_data)
+    delete_response = requests.delete(api_url, headers=HEADERS, json=delete_data)
     delete_response.raise_for_status()
     print(f"🗑️ Successfully deleted {filename}.")
 
@@ -111,4 +86,21 @@ def generate_index():
     print("📜 Index updated!")
 
 if __name__ == "__main__":
-    generate_index()  # Auto-update index on script run
+    if len(sys.argv) < 3:
+        print("Usage: python rhif_markdown_manager.py <action> <filename> [content]")
+        sys.exit(1)
+    
+    action = sys.argv[1].lower()
+    filename = sys.argv[2]
+    content = " ".join(sys.argv[3:]) if len(sys.argv) > 3 else ""
+    
+    if action == "create" or action == "overwrite":
+        update_markdown_file(filename, content, mode="overwrite")
+    elif action == "append":
+        update_markdown_file(filename, content, mode="append")
+    elif action == "delete":
+        delete_markdown_file(filename)
+    elif action == "index":
+        generate_index()
+    else:
+        print("❌ Invalid action. Use 'create', 'append', 'delete', or 'index'.")
